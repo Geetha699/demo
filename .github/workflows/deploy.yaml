@@ -24,17 +24,17 @@ jobs:
       id: ecr-login
       uses: aws-actions/amazon-ecr-login@v1
 
-    - name: Get version from VERSION file
-      id: get-version
-      run: |
-        if [ -f VERSION ]; then
-          VERSION=$(cat VERSION)
-        else
-          echo "VERSION file not found. Exiting..."
-          exit 1
-        fi
-        echo "Current version: $VERSION"
-        echo ::set-output name=version::$VERSION
+    # - name: Get version from VERSION file
+    #   id: get-version
+    #   run: |
+    #     if [ -f VERSION ]; then
+    #       VERSION=$(cat VERSION)
+    #     else
+    #       echo "VERSION file not found. Exiting..."
+    #       exit 1
+    #     fi
+    #     echo "Current version: $VERSION"
+    #     echo ::set-output name=version::$VERSION
 
     - name: Build Docker image
       run: |
