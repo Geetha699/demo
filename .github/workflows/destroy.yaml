@@ -1,10 +1,10 @@
 name: Terraform Destroy Workflow
 
 on:
-
-  workflow_dispatch:
-#     branches:
-#       - infra  # Manually trigger the destroy workflow.
+  push:
+  # workflow_dispatch:
+    branches:
+      - infra  # Manually trigger the destroy workflow.
 
 jobs:
   terraform:
