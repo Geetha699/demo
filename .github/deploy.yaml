@@ -1,50 +1,58 @@
-name: Deploy to Amazon ECR
+name: Build  Image to AWS ECR
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
 
 jobs:
-  build-and-push:
+  build:
+    name: Build and push to ECR
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
 
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
+    - name: Log in to AWS ECR
+      id: ecr-login
+      uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Debug ECR Registry Output
-        run: echo "ECR Registry: ${{ steps.login-ecr.outputs.registry }}"
+    - name: Get version from VERSION file
+      id: get-version
+      run: |
+        if [ -f VERSION ]; then
+          VERSION=$(cat VERSION)
+        else
+          echo "VERSION file not found. Exiting..."
+          exit 1
+        fi
+        echo "Current version: $VERSION"
+        echo ::set-output name=version::$VERSION
 
-      - name: Build, Tag, and Push Docker Image to ECR
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: my-app
-          IMAGE_TAG: ${{ github.sha }}
-        run: |
-          echo "Building Docker image..."
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-          
-          echo "Listing Docker images..."
-          docker images
+    - name: Build Docker image
+      run: |
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:${{ steps.get-version.outputs.version }} .
+      env:
+        ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+        ECR_REPOSITORY: my-app
 
-          echo "Logging in to Docker manually..."
-          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $ECR_REGISTRY
+    - name: Tag Docker image with semantic version
+      run: |
+        docker tag $ECR_REGISTRY/$ECR_REPOSITORY:${{ steps.get-version.outputs.version }} $ECR_REGISTRY/$ECR_REPOSITORY:${{ steps.get-version.outputs.version }}
+      env:
+        ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+        ECR_REPOSITORY: my-app
 
-          echo "Pushing image to ECR..."
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          
-      - name: Verify Image in ECR
-        run: |
-          aws ecr describe-images --repository-name my-app --region us-east-1
+    - name: Push Docker image to ECR
+      run: |
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:${{ steps.get-version.outputs.version }}
+      env:
+        ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+        ECR_REPOSITORY: my-app
