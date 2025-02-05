@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main  # Change this to match your main branch
-
+  workflow_dispatch:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
