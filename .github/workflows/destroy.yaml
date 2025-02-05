@@ -4,7 +4,7 @@ on:
 
   workflow_dispatch:
 #     branches:
-#       - infra  # Manually trigger the destroy workflow
+#       - infra  # Manually trigger the destroy workflow.
 
 jobs:
   terraform:
