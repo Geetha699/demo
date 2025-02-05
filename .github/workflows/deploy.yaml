@@ -1,70 +1,35 @@
-name: Build Image to AWS ECR
+name: Build and Push Docker Image to ECR
 
 on:
   push:
-    branches: [main]
-
+    branches:
+      - main  
+  workflow_dispatch:
 jobs:
-  build:
-    name: Build and push to ECR
+  build-and-push:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout Repository
+        uses: actions/checkout@v3
 
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-east-1
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1  # Change to your AWS region
 
-    - name: Log in to AWS ECR
-      id: ecr-login
-      uses: aws-actions/amazon-ecr-login@v1
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
 
-    - name: Get version from VERSION file
-      id: get-version
-      run: |
-        if [ -f VERSION ]; then
-          VERSION=$(cat VERSION)
-        else
-          echo "VERSION file not found. Exiting..."
-          exit 1
-        fi
-        echo "Current version: $VERSION"
-        echo ::set-output name=version::$VERSION
-
-    - name: Build Docker image
-      run: |
-        if [ -z "${{ steps.get-version.outputs.version }}" ]; then
-          echo "Error: VERSION is not set. Exiting..."
-          exit 1
-        fi
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:${{ steps.get-version.outputs.version }} .
-      env:
-        ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
-        ECR_REPOSITORY: my-app
-
-    - name: Tag Docker image with semantic version
-      run: |
-        if [ -z "${{ steps.get-version.outputs.version }}" ]; then
-          echo "Error: VERSION is not set. Exiting..."
-          exit 1
-        fi
-        docker tag $ECR_REGISTRY/$ECR_REPOSITORY:${{ steps.get-version.outputs.version }} $ECR_REGISTRY/$ECR_REPOSITORY:${{ steps.get-version.outputs.version }}
-      env:
-        ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
-        ECR_REPOSITORY: my-app
-
-    - name: Push Docker image to ECR
-      run: |
-        if [ -z "${{ steps.get-version.outputs.version }}" ]; then
-          echo "Error: VERSION is not set. Exiting..."
-          exit 1
-        fi
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:${{ steps.get-version.outputs.version }}
-      env:
-        ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
-        ECR_REPOSITORY: my-app
+      - name: Build, Tag, and Push Docker Image to ECR
+        env:
+          ECR_REGISTRY: 513111466874.dkr.ecr.us-east-1.amazonaws.com
+          ECR_REPOSITORY: my-app  # Change to your ECR repository name
+          IMAGE_TAG: latest  
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          # 513111466874.dkr.ecr.us-east-1.amazonaws.com/my-app
