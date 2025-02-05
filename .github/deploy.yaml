@@ -1,10 +1,10 @@
-name: Build and Push Docker Image to ECR
+name: Deploy to Amazon ECR
 
 on:
   push:
     branches:
-      - main  # Change this to match your main branch
-  workflow_dispatch:
+      - main
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
@@ -18,17 +18,33 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1  
+          aws-region: us-east-1
 
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
+      - name: Debug ECR Registry Output
+        run: echo "ECR Registry: ${{ steps.login-ecr.outputs.registry }}"
+
       - name: Build, Tag, and Push Docker Image to ECR
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: my-app  # Change to your ECR repository name
-          IMAGE_TAG: latest  # You can use Git SHA or other tags
+          ECR_REPOSITORY: my-app
+          IMAGE_TAG: ${{ github.sha }}
         run: |
+          echo "Building Docker image..."
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          
+          echo "Listing Docker images..."
+          docker images
+
+          echo "Logging in to Docker manually..."
+          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $ECR_REGISTRY
+
+          echo "Pushing image to ECR..."
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          
+      - name: Verify Image in ECR
+        run: |
+          aws ecr describe-images --repository-name my-app --region us-east-1
