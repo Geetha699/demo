@@ -1,12 +1,12 @@
 name: Terraform Workflow
 
 on:
-  # push:
-  #   branches:
-  #     - infra  # Trigger on push to the 'main' branch, change if you use a different branch
-  # pull_request:
-  #   branches:
-  #     - infra  # Trigger on pull request to the 'main' branch
+  push:
+    branches:
+      - infra  # Trigger on push to the 'main' branch, change if you use a different branch
+  pull_request:
+    branches:
+      - infra  # Trigger on pull request to the 'main' branch
   workflow_dispatch: # Manual trigger from GitHub UI
 
 jobs:
