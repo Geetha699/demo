@@ -1,4 +1,4 @@
-name: Build  Image to AWS ECR
+name: Build Image to AWS ECR
 
 on:
   push:
@@ -24,20 +24,24 @@ jobs:
       id: ecr-login
       uses: aws-actions/amazon-ecr-login@v1
 
-    # - name: Get version from VERSION file
-    #   id: get-version
-    #   run: |
-    #     if [ -f VERSION ]; then
-    #       VERSION=$(cat VERSION)
-    #     else
-    #       echo "VERSION file not found. Exiting..."
-    #       exit 1
-    #     fi
-    #     echo "Current version: $VERSION"
-    #     echo ::set-output name=version::$VERSION
+    - name: Get version from VERSION file
+      id: get-version
+      run: |
+        if [ -f VERSION ]; then
+          VERSION=$(cat VERSION)
+        else
+          echo "VERSION file not found. Exiting..."
+          exit 1
+        fi
+        echo "Current version: $VERSION"
+        echo ::set-output name=version::$VERSION
 
     - name: Build Docker image
       run: |
+        if [ -z "${{ steps.get-version.outputs.version }}" ]; then
+          echo "Error: VERSION is not set. Exiting..."
+          exit 1
+        fi
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:${{ steps.get-version.outputs.version }} .
       env:
         ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
@@ -45,6 +49,10 @@ jobs:
 
     - name: Tag Docker image with semantic version
       run: |
+        if [ -z "${{ steps.get-version.outputs.version }}" ]; then
+          echo "Error: VERSION is not set. Exiting..."
+          exit 1
+        fi
         docker tag $ECR_REGISTRY/$ECR_REPOSITORY:${{ steps.get-version.outputs.version }} $ECR_REGISTRY/$ECR_REPOSITORY:${{ steps.get-version.outputs.version }}
       env:
         ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
@@ -52,6 +60,10 @@ jobs:
 
     - name: Push Docker image to ECR
       run: |
+        if [ -z "${{ steps.get-version.outputs.version }}" ]; then
+          echo "Error: VERSION is not set. Exiting..."
+          exit 1
+        fi
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:${{ steps.get-version.outputs.version }}
       env:
         ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
