@@ -7,7 +7,7 @@ on:
   pull_request:
     branches:
       - infra  # Trigger on pull request to the 'main' branch
-  workflow_dispatch: # Manual trigger from GitHub UI.
+  workflow_dispatch: # Manual trigger from GitHub UI
 
 jobs:
   terraform:

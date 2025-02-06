@@ -203,19 +203,14 @@ resource "aws_eks_node_group" "main" {
   subnet_ids      = [aws_subnet.private_subnet.id, aws_subnet.private_subnet2.id]
 
   scaling_config {
-    desired_size = 2
-    max_size     = 3
+    desired_size = 3
+    max_size     = 4
     min_size     = 1
   }
 
   instance_types = ["t2.micro"]
   capacity_type  = "ON_DEMAND"
-  labels = {
-    "dedicated" = "myapp"
-    "node-1"    = "true"
-    "node-2"    = "true"
-    "node-3"    = "true"
-  }
+
   depends_on = [aws_eks_cluster.main]
   #tags = { Name = "my-node-group" }
 
