@@ -1,14 +1,13 @@
 name: Terraform Workflow
 
 on:
-  # push:
-  #   branches:
-  #     - infra  # Trigger on push to the 'main' branch, change if you use a different branch
-  # pull_request:
-  #   branches:
-  #     - infra  # Trigger on pull request to the 'main' branch
-  workflow_dispatch: # Manual trigger from GitHub UI
-
+  push:
+    branches:
+      - infra  
+  pull_request:
+    branches:
+      - infra  
+  workflow_dispatch: 
 jobs:
   terraform:
     name: Run Terraform
@@ -16,7 +15,7 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2  # Checks out your code from the repository
+      uses: actions/checkout@v2  # Checks out your code from the repositor
     
     - name: Set up AWS credentials
       run: |
