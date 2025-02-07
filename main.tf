@@ -19,7 +19,7 @@ resource "aws_subnet" "public_subnet" {
   tags = {
     Name                           = "public-subnet"
     "kubernetes.io/role/elb"       = "1"
-    "kubernetes.io/cluster/my-eks-cluster"   = "shared"
+    "kubernetes.io/cluster/my-eks-cluster"   = "owned"
   }
 }
 
@@ -32,7 +32,7 @@ resource "aws_subnet" "public_subnet2" {
   tags = {
     Name                           = "public-subnet2"
     "kubernetes.io/role/elb"       = "1"
-    "kubernetes.io/cluster/my-eks-cluster"   = "shared"
+    "kubernetes.io/cluster/my-eks-cluster"   = "owned"
   }
 }
 
@@ -45,7 +45,7 @@ resource "aws_subnet" "private_subnet" {
   tags = {
     Name                                = "private-subnet"
     "kubernetes.io/role/internal-elb"   = "1"
-    "kubernetes.io/cluster/my-eks-cluster"   = "shared"
+    "kubernetes.io/cluster/my-eks-cluster"   = "owned"
   }
 }
 
@@ -57,7 +57,7 @@ resource "aws_subnet" "private_subnet2" {
   tags = {
     Name                                = "private-subnet2"
     "kubernetes.io/role/internal-elb"   = "1"
-    "kubernetes.io/cluster/my-eks-cluster"   = "shared"
+    "kubernetes.io/cluster/my-eks-cluster"   = "owned"
   }
 }
 
@@ -208,7 +208,7 @@ resource "aws_eks_node_group" "main" {
     min_size     = 1
   }
 
-  instance_types = ["t2.micro"]
+  instance_types = ["t2.medium"]
   capacity_type  = "ON_DEMAND"
 
   depends_on = [aws_eks_cluster.main]
