@@ -15,7 +15,7 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2  # Checks out your code from the repositor
+      uses: actions/checkout@v2  # Checks out your code from the reposito
     
     - name: Set up AWS credentials
       run: |
