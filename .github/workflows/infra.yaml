@@ -1,12 +1,12 @@
 name: Terraform Workflow
 
 on:
-  push:
-    branches:
-      - infra  
-  pull_request:
-    branches:
-      - infra  
+  # push:
+  #   branches:
+  #     - infra  
+  # pull_request:
+  #   branches:
+  #     - infra  
   workflow_dispatch: 
 jobs:
   terraform:
