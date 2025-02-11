@@ -203,12 +203,12 @@ resource "aws_eks_node_group" "main" {
   subnet_ids      = [aws_subnet.private_subnet.id, aws_subnet.private_subnet2.id]
 
   scaling_config {
-    desired_size = 3
-    max_size     = 4
+    desired_size = 2
+    max_size     = 3
     min_size     = 1
   }
 
-  instance_types = ["t2.medium"]
+  instance_types = ["t2.micro"]
   capacity_type  = "ON_DEMAND"
 
   depends_on = [aws_eks_cluster.main]

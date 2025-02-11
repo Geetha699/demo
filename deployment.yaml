@@ -5,7 +5,7 @@ metadata:
   labels:
     app: latest
 spec:
-  replicas: 2
+  replicas: 3
   selector:
     matchLabels:
       app: latest
@@ -14,8 +14,66 @@ spec:
       labels:
         app: latest
     spec:
+
       containers:
         - name: frontend-container
           image: 513111466874.dkr.ecr.us-east-1.amazonaws.com/my-ecr-repo:latest  #  app image
           ports:
             - containerPort: 8080 
+      # nodeSelector:
+      #   ng: "first"
+      affinity:
+         nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: ng1
+                    operator: In
+                    values:
+                      - sfirst  
+              - matchExpressions:
+                  - key: ng2
+                    operator: In
+                    values:
+                      - second
+              - matchExpressions:
+                  - key: ng3
+                    operator: In
+                    values:
+                      - third
+      #           
+    #   tolerations:
+    #     - key: "dedicated"
+    #       operator: "Equal"
+    #       value: "latest"
+    #       effect: "NoSchedule"
+      # containers:
+      #   - name: myapp-container
+      #     image: 513111466874.dkr.ecr.us-east-1.amazonaws.com/my-ecr-repo:latest  #  app image
+      #     ports:
+      #       - containerPort: 8080
+    #       livenessProbe:
+    #         httpGet:
+    #           path: /healthz
+    #           port: 8080
+    #         initialDelaySeconds: 10
+    #         periodSeconds: 5
+    #         failureThreshold: 3
+    #       readinessProbe:
+    #         httpGet:
+    #           path: /readiness
+    #           port: 8080
+    #         initialDelaySeconds: 5
+    #         periodSeconds: 5
+    #         failureThreshold: 3
+    #     - name: sidecar-container
+    #       image: busybox:latest  # Sidecar container to capture logs (can be changed as needed)
+    #       command: ["sh", "-c", "tail -f /var/log/myapp.log"]
+    #       volumeMounts:
+    #         - name: log-volume
+    #           mountPath: /var/log
+    #   volumes:
+    #     - name: log-volume
+    #       emptyDir: {}  # EmptyDir volume for capturing logs
+
+
